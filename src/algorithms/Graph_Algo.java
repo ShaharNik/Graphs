@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,20 +17,22 @@ import dataStructure.Vertex;
 import dataStructure.edge_data;
 import dataStructure.graph;
 import dataStructure.node_data;
+import utils.Point3D;
 /**
  * This empty class represents the set of graph-theory algorithms
  * which should be implemented as part of Ex2 - Do edit this class.
  * @author 
  *
  */
-public class Graph_Algo implements graph_algorithms{
-
+public class Graph_Algo implements graph_algorithms
+{
 	graph graph;
 	@Override
 	public void init(graph g) 
 	{
 		// TODO Auto-generated method stub
 		this.graph = g;
+
 	}
 
 	@Override
@@ -68,7 +71,59 @@ public class Graph_Algo implements graph_algorithms{
 			e.printStackTrace();
 		}
 	}
+	public boolean isConnectedNotEfficient() 
+	{
+		Collection<node_data> vertex = this.graph.getV();
+		ArrayList<Integer> arrSrc= new ArrayList<>();
+		ArrayList<Integer> arrDest= new ArrayList<>();
+		if(vertex.size()==1)
+			return true;
+		if(vertex.size()==0)
+			throw new RuntimeException("no vertex");
+		for(node_data n:graph.getV()) 
+		{
+			for (edge_data e : graph.getE(n.getKey()))
+			{
+				arrSrc.add(e.getSrc());
+				arrDest.add(e.getDest()); 
+			}
+		}
+		for(node_data n:graph.getV())
+		{
+			if(!arrSrc.contains(n.getKey())||!arrDest.contains(n.getKey()))
+				return false;
+		}
+		return true;
+	}
+	public boolean isConnected() 
+	{
+		Collection<node_data> vertexes = graph.getV();
+		for (node_data node : vertexes) 
+		{
+			ResetTags(graph);
+			if(graph.nodeSize() > numOfConnected(node))
+				return false;	
+		}
 
+		return true;
+	}
+	
+	private int numOfConnected(node_data v)
+	{
+		if (v.getTag() == 1) 
+			return 0;
+		v.setTag(1);
+		Collection<edge_data> edgesOfv = graph.getE(v.getKey());
+		int count = 1;
+		for (edge_data edge : edgesOfv)
+		{
+			count +=numOfConnected(graph.getNode(edge.getDest()));
+		}
+
+		return count;	
+	}
+
+	
 	private int Count_Vertex_Stepped_BFS(graph g, node_data s)
 	{
 		// BFS
@@ -108,18 +163,25 @@ public class Graph_Algo implements graph_algorithms{
 		}
 		return count_vertex_reached;
 	}
-	@Override
-	public boolean isConnected() 
+	
+	public boolean isConnectedOLD() 
 	{
 		// TODO Auto-generated method stub
+		Collection<node_data> Verts = graph.getV();
+		if(Verts.size() == 1)
+			return true;
+		if(Verts.size()==0)
+			throw new RuntimeException("No vertex");
+		
 		
 		// Get Node s to start BFS from him
-		Collection<node_data> Verts = graph.getV();
 		node_data FirstNode = Verts.iterator().next();
-		
-		if (Count_Vertex_Stepped_BFS(graph, FirstNode) != graph.getV().size() +1) // if we haven't reached all the vertex from vertex s
+
+		int a1 = Count_Vertex_Stepped_BFS(graph, FirstNode);
+		int b1 = graph.getV().size() +1;
+		if (a1 != b1) // if we haven't reached all the vertex from vertex s
 			return false;
-		
+
 		graph ReversedGraph = copy(); // create a copy of the graph.
 		Reversed(ReversedGraph); // reverse it
 		//ResetTags(ReversedGraph); // in bfs func
@@ -150,83 +212,131 @@ public class Graph_Algo implements graph_algorithms{
 		}
 		//PriorityQueue(Collection<E> c)
 	}
-	/**
-	 * Reverse a graph.turns over all the edges to be b-->a instead of a-->b 
-	 *
-	 * @param g-graph
-	 * @return the same graph reversed
-	 */
 	private static graph Reversed(graph g)
 	{
-		
+
 		ArrayList<edge_data> edgesToRemove = new ArrayList<edge_data>();
 		//graph new_g;
 		for(node_data n:g.getV()) 
 		{
 			Collection<edge_data> edgesOfV = g.getE(n.getKey());
 			Iterator<edge_data> iter = edgesOfV.iterator();
-			
+
 			while(iter.hasNext())
 			{
 				edge_data temp = iter.next();
-				
 				int curEdest = temp.getDest();
 				int curEsrc = temp.getSrc();
+				if (curEdest == curEsrc)
 				g.connect(curEdest,curEsrc,temp.getWeight());
 				edgesToRemove.add(temp);
-				
+
 			}
-			for (edge_data edge_data2 : edgesToRemove) {
+			for (edge_data edge_data2 : edgesToRemove) // delete edges
+			{
 				g.removeEdge(edge_data2.getSrc(), edge_data2.getDest());
 			}
-			/*
-			for(edge_data e: g.getE(n.getKey()))
-			{
-				//int revSrc = e.getSrc();
-				//int revDest = e.getDest();
-				g.connect(e.getDest(),e.getSrc(),e.getWeight());
-				g.removeEdge(e.getSrc(),e.getDest());
-			}
-			*/
 		}
 		return g;
 	}
-
-	@Override
-	public double shortestPathDist(int src, int dest) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	public void Dikstra(graph g)
+	/**
+	 * Reverse a graph.turns over all the edges to be b-->a instead of a-->b 
+	 *
+	 * @param g-graph
+	 * @return the same graph reversed
+	 */
+	
+	private static graph ReversedNew(graph g)
 	{
-		LinkedList<node_data> VertexQueue = new LinkedList<>();
-		int v_Reached = 0;
-		double distance = 0;
-		while (v_Reached < g.getV().size())
+
+		ArrayList<edge_data> edgesToRemove = new ArrayList<edge_data>();
+		//graph new_g;
+		for(node_data n:g.getV()) 
 		{
-			for(node_data n:g.getV())
+			//Collection<edge_data> edgesOfV = g.getE(n.getKey());
+			//Iterator<edge_data> iter = edgesOfV.iterator();
+
+			// new
+			for (edge_data e : g.getE(n.getKey()))
 			{
-				for(edge_data e: g.getE(n.getKey()))
+				/*
+				if (g.getNode(e.getDest()). == g.getNode(e.getSrc()))
 				{
-					
+
+				}
+				*/
+				if (e.getDest() == e.getSrc())
+				{
+					// dont remove
+				}
+				else
+				{
+					g.connect(e.getDest(),e.getSrc(),e.getWeight());
+					edgesToRemove.add(e);
 				}
 			}
-			
-			v_Reached++;
+			// new
+			for (edge_data edge_data2 : edgesToRemove) // delete edges
+			{
+				g.removeEdge(edge_data2.getSrc(), edge_data2.getDest());
+			}
 		}
+		return g;
+	}
+	
+
+	@Override
+	public double shortestPathDist(int src, int dest) 
+	{
+		// TODO Auto-generated method stub
+
+		// Initialize distances of all vertices as infinite, and Set tags to zero.
+		setTagsAndWeight();
+
+		//Generate a new Priority Queue with Comparator of weight
+		PriorityQueue<node_data> PrioQueue = new PriorityQueue<node_data>(new comperator());
+
+		// Start saving distances using Dikstra From the src vertex
+		PrioQueue.add(graph.getNode(src)); 
+		// set first node weight 0 zero
+		PrioQueue.peek().setWeight(0); 
+
+
+		while (!PrioQueue.isEmpty()) // while not all vertexes reached
+		{
+			//Extract minimum distance vertex from Set. 
+			node_data currNode = PrioQueue.poll();
+
+			if (currNode.getTag() == 0) // Vertex not stepped yet
+			{
+				currNode.setTag(1); // mark vertex as visited
+				Collection<edge_data> edges = graph.getE(currNode.getKey()); // Extract minimum distance vertex from prioQueue
+				for (edge_data edge : edges) // Loop through all adjacent of u and do following for every destination vertex.	       
+				{
+					node_data destNode = graph.getNode(edge.getDest()); // dest vertex
+					if(destNode.getWeight() > currNode.getWeight() + edge.getWeight())
+					{
+						destNode.setWeight(currNode.getWeight() + edge.getWeight());
+						destNode.setInfo(currNode.getKey()+"");
+						if(destNode.getTag() == 0)
+						{
+							PrioQueue.add(destNode);
+						}
+					}
+				}
+			}
+			else
+			{
+				PrioQueue.poll();
+			}
+		}
+		return graph.getNode(dest).getWeight();
 	}
 	private void setTagsAndWeight()
 	{
-//		for(node_data n:graph.getV()) 
-//		{
-//			n.setTag(0);
-//			for(edge_data e: graph.getE(n.getKey()))
-//			{
-//				e.setWeight = Integer.MAX_VALUE; // ?
-//			}
-//		}
 		Collection<node_data> c_node_data = graph.getV();
-		for (node_data node_data : c_node_data) {
+		for (node_data node_data : c_node_data) 
+		{
 			node_data.setTag(0);
 			node_data.setWeight(Integer.MAX_VALUE);
 			node_data.setInfo("");
@@ -234,7 +344,8 @@ public class Graph_Algo implements graph_algorithms{
 	}
 
 	@Override
-	public List<node_data> shortestPath(int src, int dest) {
+	public List<node_data> shortestPath(int src, int dest) 
+	{
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -265,5 +376,17 @@ public class Graph_Algo implements graph_algorithms{
 		}
 		return new_graph;
 	}
+}
+class comperator implements Comparator<node_data>
+{
+
+	@Override
+	public int compare(node_data o1, node_data o2) 
+	{
+		// TODO Auto-generated method stub
+		return (int)(o1.getWeight() - o2.getWeight());
+	}
 
 }
+
+
