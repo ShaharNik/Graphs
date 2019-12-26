@@ -36,13 +36,79 @@ public class myTestsShahar
 //		s.addNode(new Vertex(2));
 //		s.connect(1, 2, 0);
 		Graph_Algo e = new Graph_Algo();
-		//Graph_Algo e = new Graph_Algo();
 		e.init(s);
 		System.out.println(e.isConnected());
 	}
+	static void isConnected2() 
+	{
+		graph s = new DGraph();
+		s.addNode(new Vertex(1));
+		s.addNode(new Vertex(2));
+		s.addNode(new Vertex(3));
+		s.connect(1, 2, 0);
+		s.connect(3, 2, 0);
+		s.connect(1, 3, 0);
+		s.connect(2, 1, 0);
+		Graph_Algo e = new Graph_Algo();
+		e.init(s);
+		System.out.println("2) need true and get: "+e.isConnected());
+	}
+	static void isConnected3() 
+	{
+		graph s = new DGraph();
+		s.addNode(new Vertex(1));
+		s.addNode(new Vertex(2));
+		s.addNode(new Vertex(3));
+		s.connect(1, 2, 0);
+		s.connect(2, 3, 0);
+		s.connect(3, 1, 0);
+		//s.connect(2, 1, 0);
+		Graph_Algo e = new Graph_Algo();
+		e.init(s);
+		System.out.println("3) need true and get: "+e.isConnected());
+	}
+	static void isConnected4() 
+	{
+		graph s = new DGraph();
+		s.addNode(new Vertex(1));
+		s.addNode(new Vertex(2));
+		s.addNode(new Vertex(3));
+		s.connect(1, 2, 0);
+		s.connect(3, 2, 0);
+		s.connect(1, 3, 0);
+		Graph_Algo e = new Graph_Algo();
+		e.init(s);
+		System.out.println("4) need false and get: "+e.isConnected());
+	}
+	static void isConnected5() 
+	{
+		graph s = new DGraph();
+		s.addNode(new Vertex(1));
+		s.addNode(new Vertex(2));
+		s.connect(1, 2, 0);
+		s.connect(2, 1, 0);
+		Graph_Algo e = new Graph_Algo();
+		e.init(s);
+		System.out.println("5) need true and get: "+e.isConnected());
+	}
+	static void isConnected6() 
+	{
+		graph s = new DGraph();
+		s.addNode(new Vertex(1));
+		s.addNode(new Vertex(2));
+		s.connect(1, 2, 0);
+		Graph_Algo e = new Graph_Algo();
+		e.init(s);
+		System.out.println("6) need false and get: "+e.isConnected());
+	}
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		isConnected();
+		//isConnected();
+		isConnected2();
+		isConnected3();
+		isConnected4();
+		isConnected5();
+		isConnected6();
 	}
 
 }
