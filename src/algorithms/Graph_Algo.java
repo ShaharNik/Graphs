@@ -97,18 +97,19 @@ public class Graph_Algo implements graph_algorithms
 	}
 	public boolean isConnected() 
 	{
+		//graph copy = copy();
 		Collection<node_data> vertexes = graph.getV();
 		for (node_data node : vertexes) 
 		{
 			ResetTags(graph);
-			if(graph.nodeSize() > numOfConnected(node))
+			if(graph.nodeSize() > count_edges(node))
 				return false;	
 		}
 
 		return true;
 	}
 	
-	private int numOfConnected(node_data v)
+	private int count_edges(node_data v)
 	{
 		if (v.getTag() == 1) 
 			return 0;
@@ -117,7 +118,7 @@ public class Graph_Algo implements graph_algorithms
 		int count = 1;
 		for (edge_data edge : edgesOfv)
 		{
-			count +=numOfConnected(graph.getNode(edge.getDest()));
+			count += count_edges(graph.getNode(edge.getDest()));
 		}
 
 		return count;	
@@ -290,6 +291,9 @@ public class Graph_Algo implements graph_algorithms
 	{
 		// TODO Auto-generated method stub
 
+		//if (!this.isConnected()) // if the graph isn't connected
+			//return Double.POSITIVE_INFINITY;
+		
 		// Initialize distances of all vertices as infinite, and Set tags to zero.
 		setTagsAndWeight();
 
@@ -310,6 +314,7 @@ public class Graph_Algo implements graph_algorithms
 			if (currNode.getTag() == 0) // Vertex not stepped yet
 			{
 				currNode.setTag(1); // mark vertex as visited
+				PrioQueue.poll(); // remove from queue.
 				Collection<edge_data> edges = graph.getE(currNode.getKey()); // Extract minimum distance vertex from prioQueue
 				for (edge_data edge : edges) // Loop through all adjacent of u and do following for every destination vertex.	       
 				{
@@ -343,11 +348,23 @@ public class Graph_Algo implements graph_algorithms
 		}
 	}
 
+	/**
+	 * The function here starts from the destination vertex, every vertex info is the prev vertex that we came from, that's how we backtrack finding the path.
+	 **/
 	@Override
 	public List<node_data> shortestPath(int src, int dest) 
 	{
 		// TODO Auto-generated method stub
-		return null;
+		double d = shortestPathDist(src, dest);
+		List<node_data> ans = new ArrayList<node_data>();
+		node_data currNode = graph.getNode(dest);
+		while(!currNode.getInfo().isEmpty())
+		{
+			ans.add(0, currNode);
+			currNode = graph.getNode(Integer.parseInt(currNode.getInfo()));
+		}
+		ans.add(0, currNode);
+		return ans;
 	}
 
 	@Override
@@ -355,8 +372,27 @@ public class Graph_Algo implements graph_algorithms
 	{
 		// TODO Auto-generated method stub
 
+		int index=0;
+		int tempIndex =0;
+		int targetsIndex=0;
+		boolean flag = true;
+		List<node_data> ans = new LinkedList<>();
+		List<node_data> temp = new LinkedList<>();
+		while(!targets.isEmpty())
+		{
+			temp = shortestPath(targetsIndex,targetsIndex+1);
+			for (int i = 0; i <temp.size() ; i++) 
+			{
+				if(!ans.contains(temp.get(i)) && targets.contains(temp.get(i).getKey())){
+					ans.add(temp.get(i));
+					targets.remove(temp.get(i).getKey());
+				}
 
-		return null;
+			}
+
+		}
+
+		return ans;
 	}
 
 	@Override
