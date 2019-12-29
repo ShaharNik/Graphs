@@ -12,7 +12,8 @@ import dataStructure.Vertex;
 import dataStructure.graph;
 import dataStructure.node_data;
 
-class AlgoTests {
+class AlgoTests 
+{
 
 	@Test
 	void testIsConnected() 
@@ -145,6 +146,17 @@ class AlgoTests {
 		Graph_Algo e = new Graph_Algo();
 		e.init(s);
 		System.out.println("distance: "+e.shortestPathDist(2, 1));
+	}
+	@Test
+	void testSave() 
+	{
+		Graph_Algo a = new Graph_Algo();
+		a.save("Gamlol.txt");
+		Graph_Algo b = new Graph_Algo();
+		b.init("Gamlol.txt");
+		double a1_to_6 = a.shortestPathDist(1, 6);
+		double b1_to_6 = b.shortestPathDist(1, 6);
+		assertEquals(a1_to_6, b1_to_6,0.001);
 	}
 
 }

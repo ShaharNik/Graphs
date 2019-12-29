@@ -7,11 +7,15 @@ import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileSystemView;
 
 import algorithms.Graph_Algo;
 import algorithms.graph_algorithms;
@@ -45,10 +49,10 @@ public class Window extends JFrame implements ActionListener
 		menuBar.add(menu);
 		this.setMenuBar(menuBar);
 
-		MenuItem item1 = new MenuItem("Init Graph");
+		MenuItem item1 = new MenuItem("Init Graph From File");
 		item1.addActionListener(this);
 
-		MenuItem item2 = new MenuItem("Save Graph");
+		MenuItem item2 = new MenuItem("Save Graph As textFile");
 		item2.addActionListener(this);
 
 		menu.add(item1);
@@ -61,10 +65,16 @@ public class Window extends JFrame implements ActionListener
 		MenuItem item3 = new MenuItem("isConnected");
 		item3.addActionListener(this);
 
-		MenuItem item4 = new MenuItem("TSP");
+		MenuItem item4 = new MenuItem("Shortest Path");
 		item4.addActionListener(this);
+
+		MenuItem item5 = new MenuItem("TSP");
+		item5.addActionListener(this);
+
+
 		menu2.add(item3);
 		menu2.add(item4);
+		menu2.add(item5);
 	}
 
 	public void paint(Graphics g)
@@ -106,15 +116,13 @@ public class Window extends JFrame implements ActionListener
 		String Option = e.getActionCommand();
 		switch (Option)
 		{
-		case "Init Graph": initGraph();
+		case "Init Graph From File": initGraph();
 		break;
-		case "Save Graph":
-		{
-			//g.save("myGraph.txt");
-		}
+		case "Save Graph As textFile": saveToFile();
 		break;
 		case "isConnected": isConnected();
-
+		break;
+		case "Shortest Path": shortestPath();
 		break;
 		}
 
@@ -122,7 +130,7 @@ public class Window extends JFrame implements ActionListener
 	private void isConnected()
 	{
 		JFrame jinput = new JFrame();
-		if (_graph.getV().size() == 0)
+		if (_graph.getV().size() == 0 || this._graph == null)
 			JOptionPane.showMessageDialog(jinput, "Init a graph first");
 		else
 		{
@@ -135,7 +143,58 @@ public class Window extends JFrame implements ActionListener
 				JOptionPane.showMessageDialog(jinput, "The Graph is NOT Strongly Connected");
 		}
 	}
+	/**
+	 * Save the current graph into a deserializable file.
+	 */
+	private void saveToFile()
+	{
+		JFrame jinput = new JFrame();
+		if (_graph.getV().size() == 0 || this._graph == null)
+			JOptionPane.showMessageDialog(jinput, "The graph is empty, there is nothing to save");
+		else
+		{
+			Graph_Algo ga = new Graph_Algo();
+			ga.init(this._graph);
+			JFileChooser jf = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+			jf.setDialogTitle("Choose a directory to save your file: ");
+
+			jf.setAcceptAllFileFilterUsed(false);
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+			jf.addChoosableFileFilter(filter);
+
+			int returnV = jf.showOpenDialog(null);
+			if (returnV == JFileChooser.APPROVE_OPTION) 
+			{
+				try 
+				{
+					ga.save(jf.getSelectedFile()+".txt");
+				} 
+				catch (Exception ex) 
+				{
+					ex.printStackTrace();
+				}
+			}
+		}
+	}
 	private void initGraph()
+	{
+		Graph_Algo ga = new Graph_Algo();
+		JFileChooser jf = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+
+		jf.setAcceptAllFileFilterUsed(false);
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+		jf.addChoosableFileFilter(filter);
+
+		int returnV = jf.showOpenDialog(null);
+		if (returnV == JFileChooser.APPROVE_OPTION) 
+		{
+			File selectedFile = jf.getSelectedFile();
+			ga.init(selectedFile.getAbsolutePath());
+			this._graph = ga.copy();
+			repaint();
+		}
+	}
+	private void makeGraph()
 	{
 		this._graph.addNode(new Vertex(1,new Point3D(100,100)));
 		this._graph.addNode(new Vertex(2,new Point3D(50,300)));
@@ -156,8 +215,28 @@ public class Window extends JFrame implements ActionListener
 		_graph.connect(5, 7, 0);
 		_graph.connect(6, 7, 0);
 		_graph.connect(7, 2, 0);
-		repaint();
 	}
+	private void shortestPath()
+	{
+		JFrame jinput = new JFrame();
+		if (_graph.getV().size() == 0 || this._graph == null)
+			JOptionPane.showMessageDialog(jinput, "The graph is empty, there is nothing to save");
 
+		String src_key = JOptionPane.showInputDialog(jinput,"Enter Src Vertex Key");		
+		String dest_key = JOptionPane.showInputDialog(jinput,"Enter Destination Vertex Key");
+		try
+		{
+			int src = Integer.parseInt(src_key);
+			int dest = Integer.parseInt(dest_key);
+			Graph_Algo ga = new Graph_Algo();
+			ga.init(this._graph);
+			double dis = ga.shortestPathDist(src, dest);
+			JOptionPane.showMessageDialog(jinput, "The shortest distance between them is:" + dis);
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+	}
 
 }

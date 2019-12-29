@@ -1,12 +1,18 @@
 package dataStructure;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
-public class DGraph implements graph
+public class DGraph implements graph, Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7198496570353106889L;
+
 	Hashtable<Integer, node_data> Vertexes;
 
 	Hashtable<node_data, Hashtable<Integer,edge_data>> Edges;
@@ -89,14 +95,21 @@ public class DGraph implements graph
 	{
 		// TODO Auto-generated method stub
 		MC++;
-		node_data vert = Vertexes.get(key);
-		Set<node_data> sets = Edges.keySet();
-		for (node_data node_data : sets)
+		node_data vertex = Vertexes.get(key);
+		Set<node_data> sets_of_nodes = Edges.keySet();
+		for (node_data node_data : sets_of_nodes)
 		{
-			Edges.get(node_data).remove(key);
-			edgesCounter--;
+			edge_data edge = Edges.get(node_data).remove(key);
+			if(edge != null)
+			{
+				edgesCounter--;
+	
+			}
+			
 		}
-		Edges.remove(vert);
+		edgesCounter = edgesCounter - Edges.get(vertex).size();
+		
+		Edges.remove(vertex);
 		return Vertexes.remove(key);
 	}
 

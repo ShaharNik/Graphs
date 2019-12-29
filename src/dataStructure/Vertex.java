@@ -1,10 +1,16 @@
 package dataStructure;
 
+import java.io.Serializable;
+
 import utils.Point3D;
 
-public class Vertex implements node_data
+public class Vertex implements node_data, Serializable
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 221792218006334352L;
 	private int _key;
 	private Point3D _location;
 	private double _weight;
