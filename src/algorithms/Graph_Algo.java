@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -24,8 +25,12 @@ import utils.Point3D;
  * @author 
  *
  */
-public class Graph_Algo implements graph_algorithms
+public class Graph_Algo implements graph_algorithms, Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 720151264462843803L;
 	graph graph;
 	@Override
 	public void init(graph g) 
@@ -349,7 +354,7 @@ public class Graph_Algo implements graph_algorithms
 	}
 
 	/**
-	 * The function here starts from the destination vertex, every vertex info is the prev vertex that we came from, that's how we backtrack finding the path.
+	 * The function starts from the destination vertex, every vertex info is the prev vertex that we came from, that's how we backtrack finding the path.
 	 **/
 	@Override
 	public List<node_data> shortestPath(int src, int dest) 
@@ -371,7 +376,9 @@ public class Graph_Algo implements graph_algorithms
 	public List<node_data> TSP(List<Integer> targets) 
 	{
 		// TODO Auto-generated method stub
-
+		if (!this.isConnected()) // if the graph isn't connected
+			return null;
+		
 		int index=0;
 		int tempIndex =0;
 		int targetsIndex=0;
