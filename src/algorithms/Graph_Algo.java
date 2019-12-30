@@ -7,7 +7,9 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +34,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 	 */
 	private static final long serialVersionUID = 720151264462843803L;
 	graph graph;
-	
+
 	public Graph_Algo()
 	{
 		this.graph = new DGraph();
@@ -118,7 +120,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 
 		return true;
 	}
-	
+
 	private int count_edges(node_data v)
 	{
 		if (v.getTag() == 1) 
@@ -134,7 +136,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		return count;	
 	}
 
-	
+
 	private int Count_Vertex_Stepped_BFS(graph g, node_data s)
 	{
 		// BFS
@@ -174,7 +176,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		}
 		return count_vertex_reached;
 	}
-	
+
 	public boolean isConnectedOLD() 
 	{
 		// TODO Auto-generated method stub
@@ -183,8 +185,8 @@ public class Graph_Algo implements graph_algorithms, Serializable
 			return true;
 		if(Verts.size()==0)
 			throw new RuntimeException("No vertex");
-		
-		
+
+
 		// Get Node s to start BFS from him
 		node_data FirstNode = Verts.iterator().next();
 
@@ -239,7 +241,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 				int curEdest = temp.getDest();
 				int curEsrc = temp.getSrc();
 				if (curEdest == curEsrc)
-				g.connect(curEdest,curEsrc,temp.getWeight());
+					g.connect(curEdest,curEsrc,temp.getWeight());
 				edgesToRemove.add(temp);
 
 			}
@@ -256,7 +258,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 	 * @param g-graph
 	 * @return the same graph reversed
 	 */
-	
+
 	private static graph ReversedNew(graph g)
 	{
 
@@ -275,7 +277,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 				{
 
 				}
-				*/
+				 */
 				if (e.getDest() == e.getSrc())
 				{
 					// dont remove
@@ -294,7 +296,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		}
 		return g;
 	}
-	
+
 
 	@Override
 	public double shortestPathDist(int src, int dest) 
@@ -302,14 +304,14 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		// TODO Auto-generated method stub
 
 		//if (!this.isConnected()) // if the graph isn't connected
-			//return Double.POSITIVE_INFINITY;
+		//return Double.POSITIVE_INFINITY;
 		if (src == dest)
 			return 0;
 		if (src < 0 || dest < 0)
 			return -1;
 		if (this.graph.getV().size() == 0 || this.graph == null)
 			return -1;
-		
+
 		// Initialize distances of all vertices as infinite, and Set tags to zero.
 		setTagsAndWeight();
 
@@ -353,10 +355,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		}
 		return graph.getNode(dest).getWeight();
 	}
-	private Exception Excecption(String string) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 	private void setTagsAndWeight()
 	{
@@ -387,37 +386,72 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		ans.add(0, currNode);
 		return ans;
 	}
-
-	@Override
-	public List<node_data> TSP(List<Integer> targets) 
+	private boolean isTherePath(int key1, int key2) 
 	{
-		// TODO Auto-generated method stub
-		if (!this.isConnected()) // if the graph isn't connected
-			return null;
-		
-		int index=0;
-		int tempIndex =0;
-		int targetsIndex=0;
-		boolean flag = true;
-		List<node_data> ans = new LinkedList<>();
-		List<node_data> temp = new LinkedList<>();
-		while(!targets.isEmpty())
+		if(shortestPath(key1, key2) == null || shortestPath(key1, key2).size() == 0) 
+			return false;
+
+		return true;
+	}
+	
+	
+	/**
+	 * The function Tries 50 combinations of shuffles of the targets list and search each try
+	 * If its shortest then the previous shuffle.
+	 * Then returns the shortest Nodes List
+	 */
+	@Override
+	public List<node_data> TSP(List<Integer> targets)
+	{
+		List <node_data> ans;
+		List <node_data> ans_to_return = TSP_Helper(targets);
+		for (int i = 0; i < 50; i++) 
 		{
-			temp = shortestPath(targetsIndex,targetsIndex+1);
-			for (int i = 0; i <temp.size() ; i++) 
+			Collections.shuffle(targets);
+			ans = TSP_Helper(targets);
+			if (ans.size() < ans_to_return.size())
 			{
-				if(!ans.contains(temp.get(i)) && targets.contains(temp.get(i).getKey())){
-					ans.add(temp.get(i));
-					targets.remove(temp.get(i).getKey());
-				}
-
+				ans_to_return = ans;
 			}
-
 		}
 
+		return ans_to_return;
+	}
+	/**
+	 * This Function gets a shuffled targets list and returns the shortest path(if exist)
+	 *  by searching the shortest path between every node to the next node linearly. 
+	 * @param targets - a list of shuffled nodes
+	 * @return shortest nodes path from each node in the list to his next neighbor.
+	 */
+	private List<node_data> TSP_Helper(List<Integer> targets) 
+	{
+		// TODO Auto-generated method stub
+		
+		List <node_data> ans = shortestPath(targets.get(0), targets.get(1));
+		int last_path = 1;
+		if(ans == null)
+			return null;
+		for(int i = 2; i < targets.size(); i++)
+		{
+			if(!ans.contains(this.graph.getNode(targets.get(i))))
+			{
+				if (!isTherePath(targets.get(last_path), targets.get(i)))
+					return null;
+				List<node_data> path_temp = shortestPath(targets.get(last_path), targets.get(i));
+				
+				// Add to ans the new path (from last target to his next neighbor target).
+				Iterator<node_data> it = path_temp.iterator(); 
+				while(it.hasNext()) 
+					ans.add(it.next());
+				
+				// Update the last node we checked path from
+				last_path = i;
+			}
+		}
 		return ans;
 	}
-
+	
+	
 	@Override
 	public graph copy() 
 	{
