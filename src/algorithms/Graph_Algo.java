@@ -393,59 +393,38 @@ public class Graph_Algo implements graph_algorithms, Serializable
 
 		return true;
 	}
-	
-	
-	/**
-	 * The function Tries 50 combinations of shuffles of the targets list and search each try
-	 * If its shortest then the previous shuffle.
-	 * Then returns the shortest Nodes List
-	 */
 	@Override
-	public List<node_data> TSP(List<Integer> targets)
-	{
-		List <node_data> ans;
-		List <node_data> ans_to_return = TSP_Helper(targets);
-		for (int i = 0; i < 50; i++) 
-		{
-			Collections.shuffle(targets);
-			ans = TSP_Helper(targets);
-			if (ans.size() < ans_to_return.size())
-			{
-				ans_to_return = ans;
-			}
-		}
-
-		return ans_to_return;
-	}
-	/**
-	 * This Function gets a shuffled targets list and returns the shortest path(if exist)
-	 *  by searching the shortest path between every node to the next node linearly. 
-	 * @param targets - a list of shuffled nodes
-	 * @return shortest nodes path from each node in the list to his next neighbor.
-	 */
-	private List<node_data> TSP_Helper(List<Integer> targets) 
+	public List<node_data> TSP(List<Integer> targets) 
 	{
 		// TODO Auto-generated method stub
+		List <node_data> ans = new ArrayList<>();
+		if (targets.size() == 0)
+			return ans;
 		
-		List <node_data> ans = shortestPath(targets.get(0), targets.get(1));
-		int last_path = 1;
-		if(ans == null)
+		if (targets.size() == 1)
+		{
+			ans.add(graph.getNode(targets.get(0)));
+			return ans;
+		}
+		
+		if (!isTherePath(targets.get(0), targets.get(1)))
 			return null;
+		
+		ans.addAll(shortestPath(targets.get(0), targets.get(1)));
+		
+		int last_path = 1;
+
 		for(int i = 2; i < targets.size(); i++)
 		{
 			if(!ans.contains(this.graph.getNode(targets.get(i))))
 			{
 				if (!isTherePath(targets.get(last_path), targets.get(i)))
 					return null;
-				List<node_data> path_temp = shortestPath(targets.get(last_path), targets.get(i));
-				
-				// Add to ans the new path (from last target to his next neighbor target).
-				Iterator<node_data> it = path_temp.iterator(); 
-				while(it.hasNext()) 
-					ans.add(it.next());
+				ans.addAll(shortestPath(targets.get(last_path), targets.get(i)));
 				
 				// Update the last node we checked path from
 				last_path = i;
+				ans.remove(i);
 			}
 		}
 		return ans;
