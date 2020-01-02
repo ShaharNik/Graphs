@@ -16,7 +16,14 @@ public class Vertex implements node_data, Serializable
 	private double _weight;
 	String _info;
 	int _tag;
-
+	public Vertex()
+	{
+		this._key = 0;
+		this._location = null;
+		this._weight = 0;
+		this._info = "";
+		this._tag = 0;
+	}
 	public Vertex(int key) 
 	{
 		this._key = key;
@@ -32,7 +39,8 @@ public class Vertex implements node_data, Serializable
 		this._location = new Point3D(location);
 	}
 
-	public Vertex(int key,Point3D location,double weight) {
+	public Vertex(int key,Point3D location,double weight) 
+	{
 		this._key = key;
 		if(location != null)
 		{
@@ -45,7 +53,8 @@ public class Vertex implements node_data, Serializable
 		this._weight = weight;
 		this._info = "";
 	}
-	public Vertex(int key,Point3D location,double weight,int tag) {
+	public Vertex(int key,Point3D location,double weight,int tag) 
+	{
 		this._key = key;
 		if(location != null)
 		{

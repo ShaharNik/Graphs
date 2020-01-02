@@ -14,6 +14,15 @@ public class Edge implements edge_data, Serializable
 	String _info;
 	int _tag;
 	
+	public Edge()
+	{
+		this._src = 0;
+		this._dest = 0;
+		this._weight = 0;
+		this._info = "";
+		this._tag = 0;
+	}
+	
 	public Edge(int srcVertex,int destVerex,double weight) {
 		this._src = srcVertex;
 		this._dest = destVerex;
@@ -29,7 +38,11 @@ public class Edge implements edge_data, Serializable
 	}
 	public Edge(Edge other)
 	{
-		this(other._src,other._dest,other._weight,other._tag);
+		this._src = other._src;
+		this._dest = other._dest;
+		this._weight = other._weight;
+		this._info = other._info;
+		this._tag = other._tag;
 	}
 		
 	@Override

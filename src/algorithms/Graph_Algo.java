@@ -34,7 +34,11 @@ public class Graph_Algo implements graph_algorithms, Serializable
 	 */
 	private static final long serialVersionUID = 720151264462843803L;
 	graph graph;
-
+	
+	public Graph_Algo(graph g)
+	{
+		this.graph = g;
+	}
 	public Graph_Algo()
 	{
 		this.graph = new DGraph();
@@ -297,20 +301,8 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		return g;
 	}
 
-
-	@Override
-	public double shortestPathDist(int src, int dest) 
+	private void Dijkstra(int src)
 	{
-		// TODO Auto-generated method stub
-
-		//if (!this.isConnected()) // if the graph isn't connected
-		//return Double.POSITIVE_INFINITY;
-		if (src == dest)
-			return 0;
-		if (src < 0 || dest < 0)
-			return -1;
-		if (this.graph.getV().size() == 0 || this.graph == null)
-			return -1;
 
 		// Initialize distances of all vertices as infinite, and Set tags to zero.
 		setTagsAndWeight();
@@ -353,6 +345,24 @@ public class Graph_Algo implements graph_algorithms, Serializable
 				PrioQueue.poll();
 			}
 		}
+	}
+
+	@Override
+	public double shortestPathDist(int src, int dest) 
+	{
+		// TODO Auto-generated method stub
+
+		//if (!this.isConnected()) // if the graph isn't connected
+		//return Double.POSITIVE_INFINITY;
+		
+		if (src == dest)
+			return 0;
+		if (src < 0 || dest < 0)
+			return -1;
+		if (this.graph.getV().size() == 0 || this.graph == null)
+			return -1;
+		
+		Dijkstra(src);
 		return graph.getNode(dest).getWeight();
 	}
 
@@ -375,7 +385,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 	public List<node_data> shortestPath(int src, int dest) 
 	{
 		// TODO Auto-generated method stub
-		double d = shortestPathDist(src, dest);
+		Dijkstra(src);
 		List<node_data> ans = new ArrayList<node_data>();
 		node_data currNode = graph.getNode(dest);
 		while(!currNode.getInfo().isEmpty())
