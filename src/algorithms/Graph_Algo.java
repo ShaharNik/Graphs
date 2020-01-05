@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
 import dataStructure.DGraph;
 import dataStructure.Vertex;
@@ -34,7 +35,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 	 */
 	private static final long serialVersionUID = 720151264462843803L;
 	graph graph;
-	
+
 	public Graph_Algo(graph g)
 	{
 		this.graph = g;
@@ -87,30 +88,6 @@ public class Graph_Algo implements graph_algorithms, Serializable
 			e.printStackTrace();
 		}
 	}
-	public boolean isConnectedNotEfficient() 
-	{
-		Collection<node_data> vertex = this.graph.getV();
-		ArrayList<Integer> arrSrc= new ArrayList<>();
-		ArrayList<Integer> arrDest= new ArrayList<>();
-		if(vertex.size()==1)
-			return true;
-		if(vertex.size()==0)
-			throw new RuntimeException("no vertex");
-		for(node_data n:graph.getV()) 
-		{
-			for (edge_data e : graph.getE(n.getKey()))
-			{
-				arrSrc.add(e.getSrc());
-				arrDest.add(e.getDest()); 
-			}
-		}
-		for(node_data n:graph.getV())
-		{
-			if(!arrSrc.contains(n.getKey())||!arrDest.contains(n.getKey()))
-				return false;
-		}
-		return true;
-	}
 	public boolean isConnected() 
 	{
 		//graph copy = copy();
@@ -140,75 +117,6 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		return count;	
 	}
 
-
-	private int Count_Vertex_Stepped_BFS(graph g, node_data s)
-	{
-		// BFS
-		//Collection<node_data> Verts = g.getV();
-
-		// Mark all the vertices as not visited
-		//cleanTags();
-		ResetTags(g);
-
-		// Create a queue for BFS
-		LinkedList<node_data> queue = new LinkedList<node_data>(); // maybe should use stack for reverse running?
-
-
-		// Mark the current node as visited and enqueue it
-		s.setTag(1);
-		queue.add(s);
-
-		int count_vertex_reached = 0;
-		while(queue.size() != 0)
-		{
-			// Dequeue a vertex from queue and print it 
-			s = queue.poll(); 
-
-			// Get all adjacent vertices of the dequeued vertex s 
-			// If a adjacent has not been visited, then mark it 
-			s.setTag(1);
-			Collection<edge_data> edge = g.getE(s.getKey()); // get all adjacent of s
-			for (edge_data adj : edge) 
-			{
-				if(adj.getTag() == 0)
-				{
-					adj.setTag(1);
-					count_vertex_reached++;
-					queue.add(g.getNode(adj.getDest()));
-				}
-			}
-		}
-		return count_vertex_reached;
-	}
-
-	public boolean isConnectedOLD() 
-	{
-		// TODO Auto-generated method stub
-		Collection<node_data> Verts = graph.getV();
-		if(Verts.size() == 1)
-			return true;
-		if(Verts.size()==0)
-			throw new RuntimeException("No vertex");
-
-
-		// Get Node s to start BFS from him
-		node_data FirstNode = Verts.iterator().next();
-
-		int a1 = Count_Vertex_Stepped_BFS(graph, FirstNode);
-		int b1 = graph.getV().size() +1;
-		if (a1 != b1) // if we haven't reached all the vertex from vertex s
-			return false;
-
-		graph ReversedGraph = copy(); // create a copy of the graph.
-		Reversed(ReversedGraph); // reverse it
-		//ResetTags(ReversedGraph); // in bfs func
-		int a = Count_Vertex_Stepped_BFS(ReversedGraph, FirstNode);
-		int b = graph.getV().size() + 1;
-		if (a != b) // if we haven't reached all the vertex from vertex s
-			return false;
-
-		return true;
-	}
 	/**
 	 * Resets all tags to be 0.
 	 * @param graph g
@@ -229,77 +137,9 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		}
 		//PriorityQueue(Collection<E> c)
 	}
-	private static graph Reversed(graph g)
-	{
 
-		ArrayList<edge_data> edgesToRemove = new ArrayList<edge_data>();
-		//graph new_g;
-		for(node_data n:g.getV()) 
-		{
-			Collection<edge_data> edgesOfV = g.getE(n.getKey());
-			Iterator<edge_data> iter = edgesOfV.iterator();
 
-			while(iter.hasNext())
-			{
-				edge_data temp = iter.next();
-				int curEdest = temp.getDest();
-				int curEsrc = temp.getSrc();
-				if (curEdest == curEsrc)
-					g.connect(curEdest,curEsrc,temp.getWeight());
-				edgesToRemove.add(temp);
 
-			}
-			for (edge_data edge_data2 : edgesToRemove) // delete edges
-			{
-				g.removeEdge(edge_data2.getSrc(), edge_data2.getDest());
-			}
-		}
-		return g;
-	}
-	/**
-	 * Reverse a graph.turns over all the edges to be b-->a instead of a-->b 
-	 *
-	 * @param g-graph
-	 * @return the same graph reversed
-	 */
-
-	private static graph ReversedNew(graph g)
-	{
-
-		ArrayList<edge_data> edgesToRemove = new ArrayList<edge_data>();
-		//graph new_g;
-		for(node_data n:g.getV()) 
-		{
-			//Collection<edge_data> edgesOfV = g.getE(n.getKey());
-			//Iterator<edge_data> iter = edgesOfV.iterator();
-
-			// new
-			for (edge_data e : g.getE(n.getKey()))
-			{
-				/*
-				if (g.getNode(e.getDest()). == g.getNode(e.getSrc()))
-				{
-
-				}
-				 */
-				if (e.getDest() == e.getSrc())
-				{
-					// dont remove
-				}
-				else
-				{
-					g.connect(e.getDest(),e.getSrc(),e.getWeight());
-					edgesToRemove.add(e);
-				}
-			}
-			// new
-			for (edge_data edge_data2 : edgesToRemove) // delete edges
-			{
-				g.removeEdge(edge_data2.getSrc(), edge_data2.getDest());
-			}
-		}
-		return g;
-	}
 
 	private void Dijkstra(int src)
 	{
@@ -354,15 +194,16 @@ public class Graph_Algo implements graph_algorithms, Serializable
 
 		//if (!this.isConnected()) // if the graph isn't connected
 		//return Double.POSITIVE_INFINITY;
-		
+
 		if (src == dest)
 			return 0;
 		if (src < 0 || dest < 0)
 			return -1;
 		if (this.graph.getV().size() == 0 || this.graph == null)
 			return -1;
-		
+
 		Dijkstra(src);
+		
 		return graph.getNode(dest).getWeight();
 	}
 
@@ -387,6 +228,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		// TODO Auto-generated method stub
 		Dijkstra(src);
 		List<node_data> ans = new ArrayList<node_data>();
+		
 		node_data currNode = graph.getNode(dest);
 		while(!currNode.getInfo().isEmpty())
 		{
@@ -396,11 +238,14 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		ans.add(0, currNode);
 		return ans;
 	}
-	private boolean isTherePath(int key1, int key2) 
+	private boolean isTherePath(int src, int dest) 
 	{
-		if(shortestPath(key1, key2) == null || shortestPath(key1, key2).size() == 0) 
+		//if(graph.getNode(src).getWeight() == Integer.MAX_VALUE || graph.getNode(dest).getWeight() == Integer.MAX_VALUE)
+			//return false;
+		if(shortestPath(src, dest) == null || shortestPath(src, dest).size() == 0) 
 			return false;
 
+		
 		return true;
 	}
 	@Override
@@ -410,18 +255,21 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		List <node_data> ans = new ArrayList<>();
 		if (targets.size() == 0)
 			return ans;
-		
+
 		if (targets.size() == 1)
 		{
 			ans.add(graph.getNode(targets.get(0)));
 			return ans;
 		}
-		
+
+		// if will be needed, an option to remove duplicates
+		// List<Integer> newList = targets.stream().distinct().collect(Collectors.toList()); 
+
 		if (!isTherePath(targets.get(0), targets.get(1)))
 			return null;
-		
+
 		ans.addAll(shortestPath(targets.get(0), targets.get(1)));
-		
+
 		int last_path = 1;
 
 		for(int i = 2; i < targets.size(); i++)
@@ -431,7 +279,7 @@ public class Graph_Algo implements graph_algorithms, Serializable
 				if (!isTherePath(targets.get(last_path), targets.get(i)))
 					return null;
 				ans.addAll(shortestPath(targets.get(last_path), targets.get(i)));
-				
+
 				// Update the last node we checked path from
 				last_path = i;
 				ans.remove(i);
@@ -439,8 +287,8 @@ public class Graph_Algo implements graph_algorithms, Serializable
 		}
 		return ans;
 	}
-	
-	
+
+
 	@Override
 	public graph copy() 
 	{
