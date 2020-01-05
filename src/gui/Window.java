@@ -29,13 +29,12 @@ import utils.Point3D;
 public class Window extends JFrame implements ActionListener
 {
 	/**
-	 * 
+	 * This Gui can save and init graphs from deserializable files, You can run algorithms on the graph and see it visual
+	 * The gui is very friendly, but more used to test the graph algorithms and creations.
 	 */
 	private static final long serialVersionUID = -3074823522732093831L;
-	//LinkedList<Point3D> points = new LinkedList<Point3D>();
+	
 	graph _graph;
-
-	//graph_algorithms g = new Graph_Algo();
 
 	public Window()
 	{
@@ -78,7 +77,7 @@ public class Window extends JFrame implements ActionListener
 
 		MenuItem item4 = new MenuItem("Shortest Path Dist");
 		item4.addActionListener(this);
-		
+
 		MenuItem item5 = new MenuItem("Shortest Path");
 		item5.addActionListener(this);
 
@@ -95,6 +94,8 @@ public class Window extends JFrame implements ActionListener
 	public void paint(Graphics g)
 	{
 		super.paint(g);
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, getWidth(), getHeight());
 		if (_graph != null)
 		{
 			Collection<node_data> points = _graph.getV();
@@ -136,7 +137,7 @@ public class Window extends JFrame implements ActionListener
 		String Option = e.getActionCommand();
 		switch (Option)
 		{
-		case "Init Graph From File": initGraph(); // NEED TO CHANGE FOR GRAPH FROM FILE
+		case "Init Graph From File": initGraph(); 
 		break;
 		case "Save Graph As textFile": saveToFile();
 		break;
@@ -151,6 +152,9 @@ public class Window extends JFrame implements ActionListener
 		}
 
 	}
+	/**
+	 * Prints a message box that tells if the graph is strongly connected or not.
+	 */
 	private void isConnected()
 	{
 		JFrame jinput = new JFrame();
@@ -200,6 +204,9 @@ public class Window extends JFrame implements ActionListener
 			}
 		}
 	}
+	/**
+	 * Init a graph from serializable file
+	 */
 	private void initGraph()
 	{
 		Graph_Algo ga = new Graph_Algo();
@@ -245,7 +252,10 @@ public class Window extends JFrame implements ActionListener
 	{
 		JFrame jinput = new JFrame();
 		if (_graph.getV().size() == 0 || this._graph == null)
-			JOptionPane.showMessageDialog(jinput, "The graph is empty, there is nothing to save");
+		{
+			JOptionPane.showMessageDialog(jinput, "The graph is empty");
+			return;
+		}
 
 		String src_key = JOptionPane.showInputDialog(jinput,"Enter Src Vertex Key");		
 		String dest_key = JOptionPane.showInputDialog(jinput,"Enter Destination Vertex Key");
@@ -256,16 +266,28 @@ public class Window extends JFrame implements ActionListener
 			Graph_Algo ga = new Graph_Algo();
 			ga.init(this._graph);
 			double dis = ga.shortestPathDist(src, dest);
-			JOptionPane.showMessageDialog(jinput, "The shortest distance between them is:" + dis);
+			if (dis == -1 || dis == Integer.MAX_VALUE)
+				JOptionPane.showMessageDialog(jinput, "There isn't a path between src to dest");
+			else
+				JOptionPane.showMessageDialog(jinput, "The shortest distance between them is:" + dis);
 		}
 		catch (Exception e) 
 		{
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * this function will paint green the shortest path (if exist) between src and dest vertexes.
+	 */
 	private void shortestPath()
 	{
 		JFrame jinput = new JFrame();
+		if (_graph.getV().size() == 0 || this._graph == null)
+		{
+			JOptionPane.showMessageDialog(jinput, "The graph is empty");
+			return;
+		}
+
 		String src_key = JOptionPane.showInputDialog(jinput,"Enter From");		
 		String dest_key = JOptionPane.showInputDialog(jinput,"Enter To");
 		try
@@ -275,16 +297,25 @@ public class Window extends JFrame implements ActionListener
 			Graph_Algo ga = new Graph_Algo();
 			ga.init(_graph);
 			List<node_data> ans = ga.shortestPath(src, dest);
-			for (int j = 0; j < ans.size()-1; j++) 
+			//System.out.println(ans.toString());
+			if (ans == null || ans.size() == 0)
+				JOptionPane.showMessageDialog(jinput, "The isn't a valid path between src to dest!!");
+			else
 			{
-				_graph.getEdge(ans.get(j).getKey(), ans.get(j+1).getKey()).setTag(555);
+				for (int j = 0; j < ans.size()-1; j++) 
+				{
+					_graph.getEdge(ans.get(j).getKey(), ans.get(j+1).getKey()).setTag(555);
+				}
+				repaint();
 			}
-			repaint();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * This will paint green the shortest path between all vertexes entered, if at least 1 target isn't reachable a messagebox will shown
+	 */
 	private void TSP()
 	{
 		JFrame jinput = new JFrame();
@@ -294,7 +325,7 @@ public class Window extends JFrame implements ActionListener
 		{
 			String amount = JOptionPane.showInputDialog(jinput, "How many targets?");
 			ArrayList<Integer> arrayTSP = new ArrayList<Integer>();
-			for (int i = 0; i < Integer.parseInt(amount); i++) 
+			for (int i = 1; i <= Integer.parseInt(amount); i++) 
 			{
 				try
 				{
@@ -307,13 +338,18 @@ public class Window extends JFrame implements ActionListener
 			}
 			Graph_Algo ga = new Graph_Algo();
 			ga.init(this._graph);
-			List<node_data> ansTSP = ga.TSP(arrayTSP); // problem
-			for (int j = 0;j < ansTSP.size()-1; j++) 
+			List<node_data> ansTSP = ga.TSP(arrayTSP); 
+			if (ansTSP == null || ansTSP.size() == 0 || ansTSP.size() == 1)
+				JOptionPane.showMessageDialog(jinput, "There isn't a valid path between 1 or more vertexes");
+			else
 			{
-				//JOptionPane.showMessageDialog(jinput, "Node index: "+ansTSP.get(j).getKey());
-				this._graph.getEdge(ansTSP.get(j).getKey(), ansTSP.get(j+1).getKey()).setTag(555);
+				for (int j = 0;j < ansTSP.size()-1; j++) 
+				{
+					//JOptionPane.showMessageDialog(jinput, "Node index: "+ansTSP.get(j).getKey());
+					this._graph.getEdge(ansTSP.get(j).getKey(), ansTSP.get(j+1).getKey()).setTag(555);
+				}
+				repaint();
 			}
-			repaint();
 
 		}
 	}
